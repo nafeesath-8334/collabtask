@@ -27,10 +27,11 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/Home" className="hover:text-indigo-400">Home</Link>
+            <Link to="/addProject" className="hover:text-indigo-400">Poject</Link>
             <Link to="/AddTask" className="hover:text-indigo-400">Tasks</Link>
             <Link to="/AddTeam" className="hover:text-indigo-400">Teams</Link>
             <Link to="/profile" className="hover:text-indigo-400">Profile</Link>
+            <Link to="/login" className="hover:text-indigo-400">Logout</Link>
           </div>
 
           {/* Right: Avatar */}

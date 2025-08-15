@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { login } from "../apiService/allApi";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { updateIsLoggedIn } from "../reduxTool/slice";
 
 const Login = () => {
     const [userDetails, setUserDetails] = useState({ email: "", password: "" });
     const [isLoading, setIsLoading] = useState(false);
-
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const handler = async (e) => {
         e.preventDefault();
 
@@ -13,16 +18,36 @@ const Login = () => {
         }
 
         setIsLoading(true);
-
-        // Simulate API call
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1500)); // mock delay
-            alert(`Email: ${userDetails.email}\nPassword: ${userDetails.password}`);
+            const result = await login(userDetails)
+            console.log(result)
+
+            if (result.status === 200) {
+
+
+                const userCredentials = {
+                    id: result.data._id,
+                    name: result.data.name,
+                    email: result.data.email,
+                    role: result.data.role
+                }
+
+                localStorage.setItem("userCredentials", JSON.stringify(userCredentials))
+                localStorage.setItem("token", JSON.stringify(result.data.token))
+
+                dispatch(updateIsLoggedIn(true))
+                navigate("/Home");
+            } else {
+
+            }
         } catch (error) {
-            alert("Something went wrong");
+
+            console.error(error)
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
+
+
     };
 
     return (

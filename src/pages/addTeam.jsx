@@ -1,29 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createTeam, fetchUserDetails } from "../apiService/allApi";
 
 const AddTeam = () => {
   const [teamDetails, setTeamDetails] = useState({
     teamName: "",
     teamDescription: "",
-    teamMembers: "",
+    teamMembers: [], // store array of selected IDs
   });
 
-  const handle = (event) => {
-    event.preventDefault();
+  const [users, setUsers] = useState([]);
+const token = JSON.parse(localStorage.getItem("token"));
+      const headers = {
+        // "content-type": "application/json",
+        authorization: `Bearer ${token}`,
+         }
+  // Fetch registered members
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetchUserDetails();
+        console.log(res);
+       
+        setUsers(res.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    fetchUsers();
+  }, []);
 
-    if (
-      !teamDetails.teamName ||
-      !teamDetails.teamDescription ||
-      !teamDetails.teamMembers
-    ) {
-      alert("Please fill in all fields");
-      return;
-    }
 
-    alert(
-      `Team Name: ${teamDetails.teamName}\n` +
-        `Team Description: ${teamDetails.teamDescription}\n` +
-        `Team Members: ${teamDetails.teamMembers}`
+
+const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  if (
+    !teamDetails.teamName ||
+    !teamDetails.teamDescription ||
+    teamDetails.teamMembers.length === 0
+  ) {
+    alert("Please fill in all fields");
+    return;
+  }
+
+  try {
+    
+    const res = await createTeam(teamDetails,headers);
+    console.log(res);
+      
+alert("Team created successfully");
+    // alert(res.data.message);
+    // console.log(res.data.team);
+  } catch (error) {
+    console.error(error);
+    alert("Error creating team");
+  }
+};
+
+
+  const handleMemberChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions).map(
+      (option) => option.value
     );
+    setTeamDetails({ ...teamDetails, teamMembers: selectedOptions });
   };
 
   return (
@@ -38,7 +77,7 @@ const AddTeam = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handle}>
+        <form onSubmit={handleSubmit}>
           <div className="p-8">
             {/* Team Name */}
             <div className="mb-6">
@@ -76,21 +115,19 @@ const AddTeam = () => {
 
             {/* Team Members */}
             <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Team Members
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Comma-separated member names"
+              <select
+                multiple
+                className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={teamDetails.teamMembers}
-                onChange={(e) =>
-                  setTeamDetails({
-                    ...teamDetails,
-                    teamMembers: e.target.value,
-                  })
-                }
-              />
+                onChange={handleMemberChange}
+              >
+                {users.map((user) => (
+                  <option key={user._id} value={user._id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+
             </div>
 
             {/* Submit button */}

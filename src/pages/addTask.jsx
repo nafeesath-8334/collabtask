@@ -1,204 +1,190 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { fetchProject, fetchProjects } from "../apiService/allApi";
 
 const AddTask = () => {
   const [taskDetails, setTaskDetails] = useState({
     title: "",
     description: "",
-    project: "",
-    assignto: "",
-    createdby: "",
-    status: "",
-    priority: "",
-    duedate: "",
+    projectId: "",
+    assignedTo: "",
+    dueDate: "",
   });
 
-  const handle = (event) => {
-    event.preventDefault();
+  const [projects, setProjects] = useState([]);
+  const [members, setMembers] = useState([]); // <-- only members of the selected project
 
-    if (
-      !taskDetails.title ||
-      !taskDetails.description ||
-      !taskDetails.project ||
-      !taskDetails.assignto ||
-      !taskDetails.createdby ||
-      !taskDetails.status ||
-      !taskDetails.priority ||
-      !taskDetails.duedate
+  const token = JSON.parse(localStorage.getItem("token"));
+  const headers = { Authorization: `Bearer ${token}` };
 
+  // Fetch all projects
+  useEffect(() => {
+    const getProjects = async () => {
+      try {
+        const res = await fetchProject(headers);
+        setProjects(res.data);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+    getProjects();
+  }, []);
 
-
-
-    ) {
-      alert("Please fill in all fields");
+  // Fetch members when project changes
+  useEffect(() => {
+    if (!taskDetails.projectId) {
+      setMembers([]);
       return;
     }
 
-    alert(
-      `Project Title:${taskDetails.title}\n` +
-      `Description:${taskDetails.description}\n` +
-      `Project:${taskDetails.project}\n` +
-      `Assignto:${taskDetails.assignto}\n` +
-      `Createdby:${taskDetails.createdby}\n` +
-      `Status:${taskDetails.status}\n` +
-      `Priority:${taskDetails.priority}\n` +
-      `Duedate:${taskDetails.duedate}`
+    const fetchProjectMembers = async () => {
+      try {
+        const res = await axios.get(
+          `/api/projects/${taskDetails.projectId}/members`,
+          { headers }
+        );
+        setMembers(res.data.members || []);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      }
+    };
 
+    fetchProjectMembers();
+  }, [taskDetails.projectId]);
 
-    );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!taskDetails.title || !taskDetails.projectId) {
+      alert("Title and Project are required");
+      return;
+    }
+
+    try {
+      await axios.post("/api/tasks", taskDetails, { headers });
+      alert("Task created successfully!");
+      setTaskDetails({
+        title: "",
+        description: "",
+        projectId: "",
+        assignedTo: "",
+        dueDate: "",
+      });
+      setMembers([]);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      alert("Error creating task");
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Header */}
         <div className="py-6 text-center">
           <h2 className="text-3xl font-bold">Add Task</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            Fill in the details below to create a new task.
-          </p>
+          <p className="text-gray-500 text-sm mt-1">Assign a task to a project.</p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handle}>
-          <div className="p-8">
-            {/* Team Name */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Title
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Title"
-                value={taskDetails.title}
-                onChange={(e) =>
-                  setTaskDetails({ ...taskDetails, title: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Team Description */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Description
-              </label>
-              <textarea
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Describe your projrct"
-                value={taskDetails.description}
-                onChange={(e) =>
-                  setTaskDetails({
-                    ...taskDetails,
-                    description: e.target.value,
-                  })
-                }
-              ></textarea>
-            </div>
-
-            {/* Assignto */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                AssignTo
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Member Name"
-                value={taskDetails.assignto}
-                onChange={(e) =>
-                  setTaskDetails({
-                    ...taskDetails,
-                    assignto: e.target.value,
-                  })
-                }
-              />
-            </div>
-            {/* Createdby */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                CreatedBy
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Member Name"
-                value={taskDetails.createdby}
-                onChange={(e) =>
-                  setTaskDetails({
-                    ...taskDetails,
-                    createdby: e.target.value,
-                  })
-                }
-
-              />
-            </div>
-            {/* Status */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Status
-              </label>
-              <select
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={taskDetails.status}
-                onChange={(e) =>
-                  setTaskDetails({
-                    ...taskDetails,
-                    status: e.target.value,
-                  })
-                }
-              >
-                <option value="">Select Status</option>
-                <option value="Not Started">Not Started</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-            {/* Priority */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Priority
-              </label>
-              <select
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={taskDetails.priority}
-                onChange={(e) =>
-                  setTaskDetails({
-                    ...taskDetails,
-                    priority: e.target.value,
-                  })
-                }
-              >
-                <option value="">Select Priority</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
-            </div>
-            {/* Due Date */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Due Date
-              </label>
-              <input
-                type="date"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={taskDetails.duedate}
-                onChange={(e) =>
-                  setTaskDetails({
-                    ...taskDetails,
-                    duedate: e.target.value,
-                  })
-                }
-              />
-            </div>
- {/* Submit button */}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-gray-500 to-gray-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:from-gray-700 hover:to-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 shadow-md hover:shadow-lg"
-            >
-              Create Task
-            </button>
+        <form onSubmit={handleSubmit} className="p-8">
+          {/* Title */}
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Title
+            </label>
+            <input
+              type="text"
+              value={taskDetails.title}
+              onChange={(e) =>
+                setTaskDetails({ ...taskDetails, title: e.target.value })
+              }
+              className="w-full border rounded-lg p-2"
+              placeholder="Task title"
+            />
           </div>
+
+          {/* Description */}
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Description
+            </label>
+            <textarea
+              value={taskDetails.description}
+              onChange={(e) =>
+                setTaskDetails({ ...taskDetails, description: e.target.value })
+              }
+              className="w-full border rounded-lg p-2"
+              placeholder="Task description"
+            ></textarea>
+          </div>
+
+          {/* Project */}
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Project
+            </label>
+            <select
+              value={taskDetails.projectId}
+              onChange={(e) =>
+                setTaskDetails({ ...taskDetails, projectId: e.target.value })
+              }
+              className="w-full border rounded-lg p-2"
+            >
+              <option value="">Select project</option>
+              {projects.map((proj) => (
+                <option key={proj._id} value={proj._id}>
+                  {proj.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Assign To (members only) */}
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Assign To
+            </label>
+            <select
+              value={taskDetails.assignedTo}
+              onChange={(e) =>
+                setTaskDetails({ ...taskDetails, assignedTo: e.target.value })
+              }
+              className="w-full border rounded-lg p-2"
+              disabled={!members.length}
+            >
+              <option value="">Select member</option>
+              {members.map((member) => (
+                <option key={member._id} value={member._id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+            {!members.length && taskDetails.projectId && (
+              <p className="text-xs text-gray-500">No members found for this project</p>
+            )}
+          </div>
+
+          {/* Due Date */}
+          <div className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Due Date
+            </label>
+            <input
+              type="date"
+              value={taskDetails.dueDate}
+              onChange={(e) =>
+                setTaskDetails({ ...taskDetails, dueDate: e.target.value })
+              }
+              className="w-full border rounded-lg p-2"
+            />
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg"
+          >
+            Create Task
+          </button>
         </form>
       </div>
     </div>

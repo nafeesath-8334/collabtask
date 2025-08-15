@@ -1,47 +1,48 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { addProject } from "../apiService/allApi";
 
 const AddProject = () => {
   const [projectDetails, setProjectDetails] = useState({
     title: "",
-    description: "", 
-    member: "",
+    description: "",
     deadline: "",
-    owner: "",
-    team: "",
-    task: "",
-    status: "",
   });
 
-  const handle = (event) => {
+  const [team, setTeam] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  const token = JSON.parse(localStorage.getItem("token"));
+  const headers = {
+    authorization: `Bearer ${token}`,
+  };
+
+  
+
+ 
+
+
+  const handle = async(event) => {
     event.preventDefault();
 
-    if (
-      !projectDetails.title||
-      !projectDetails.description ||
-      !projectDetails.member ||
-      !projectDetails.deadline ||
-      !projectDetails.owner ||
-      !projectDetails.team ||
-      !projectDetails.task ||
-      !projectDetails.status
-      
-    ) {
+    if (!projectDetails.title || !projectDetails.description || !projectDetails.deadline) {
       alert("Please fill in all fields");
       return;
     }
 
     alert(
-      `Project Title:${projectDetails.title}\n` +
-      `Description:${projectDetails.description}\n` +
-      `Member:${projectDetails.member}\n` +   
-      `Deadline:${projectDetails.deadline}\n` +
-      `Owner:${projectDetails.owner}\n` +
-
-      `Team:${projectDetails.team}\n` +
-      `Task:${projectDetails.task}\n` +
-      `Status:${projectDetails.status}`
-
+      `Project Title: ${projectDetails.title}\n` +
+        `Description: ${projectDetails.description}\n` +
+        `Deadline: ${projectDetails.deadline}`
     );
+    try {
+      // Call API to add project
+      const result= await addProject(projectDetails, headers);
+      console.log(result);
+      alert("Project created successfully");
+    } catch (error) {
+      console.error("Error creating project:", error);
+      alert("Error creating project");
+    }
   };
 
   return (
@@ -58,10 +59,10 @@ const AddProject = () => {
         {/* Form */}
         <form onSubmit={handle}>
           <div className="p-8">
-            {/* Team Name */}
+            {/* Title */}
             <div className="mb-6">
               <label className="block text-gray-700 font-medium text-sm mb-2">
-               Title
+                Title
               </label>
               <input
                 type="text"
@@ -77,14 +78,14 @@ const AddProject = () => {
               />
             </div>
 
-            {/* Team Description */}
+            {/* Description */}
             <div className="mb-6">
               <label className="block text-gray-700 font-medium text-sm mb-2">
-                 Description
+                Description
               </label>
               <textarea
                 className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Describe your projrct"
+                placeholder="Describe your project"
                 value={projectDetails.description}
                 onChange={(e) =>
                   setProjectDetails({
@@ -95,24 +96,6 @@ const AddProject = () => {
               ></textarea>
             </div>
 
-            {/* Member */}
-            <div className="mb-6">  
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Member
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Member Name"
-                value={projectDetails.member}
-                onChange={(e) =>
-                  setProjectDetails({
-                    ...projectDetails,
-                    member: e.target.value,
-                  })
-                }
-              />
-            </div>
             {/* Deadline */}
             <div className="mb-6">
               <label className="block text-gray-700 font-medium text-sm mb-2">
@@ -130,84 +113,6 @@ const AddProject = () => {
                 }
               />
             </div>
-            {/* Owner */}
-            <div className="mb-6">
-                
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Owner
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Owner Name"
-                value={projectDetails.owner}
-                onChange={(e) =>
-                  setProjectDetails({
-                    ...projectDetails,
-                    owner: e.target.value,
-                  })
-                }
-
-              />
-            </div>
-            {/* Team */}
-            <div className="mb-6">
-                
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Team
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Team Name"
-                value={projectDetails.team}
-                onChange={(e) =>
-                  setProjectDetails({
-                    ...projectDetails,
-                    team: e.target.value,
-                  })
-                }
-              />
-            </div>
-            {/* Task */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Task
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Task Name"
-                value={projectDetails.task}
-                onChange={(e) =>
-                  setProjectDetails({
-                    ...projectDetails,
-                    task: e.target.value,
-                  })
-                }
-              />
-            </div>
-            {/* Status */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Status
-              </label>
-              <select
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={projectDetails.status}
-                onChange={(e) =>
-                  setProjectDetails({
-                    ...projectDetails,
-                    status: e.target.value,
-                  })
-                }
-              >
-                <option value="">Select Status</option>
-                <option value="Not Started">Not Started</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
 
             {/* Submit button */}
             <button
@@ -224,3 +129,4 @@ const AddProject = () => {
 };
 
 export default AddProject;
+

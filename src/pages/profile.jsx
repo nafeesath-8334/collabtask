@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Navbar from "../component/Navbar"
+import { getProfile } from "../apiService/allApi"
 
 
 
@@ -9,7 +10,32 @@ const Profile = () => {
     const [user, setUser] = useState({})
     const [img, setImg] = useState("")
     const [isLoading, setIsLoading] = useState(true)
- 
+     const token = JSON.parse(localStorage.getItem("token"));
+      const headers = {
+        // "content-type": "application/json",
+        authorization: `Bearer ${token}`,
+         }
+useEffect(() => {
+  const userData = JSON.parse(localStorage.getItem("userCredentials"));
+  if (userData?.id) {
+    const id = userData.id;
+    console.log("userId", id);
+
+    const fetchUserData = async () => {
+      try {
+        const res = await getProfile(id, headers);
+        console.log("User details:", res?.data?.data);
+        setUser(res?.data?.data || {});
+        setImg(res?.data?.data?.Image || "");
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
+    fetchUserData();
+  }
+}, []);
+
 
     return (
     <>
@@ -47,9 +73,9 @@ const Profile = () => {
                         
                         {/* User Details */}
                         <div className="flex-1 text-center md:text-left">
-                            <h2 className="text-xl font-bold text-gray-500">{user?.FirstName || "User Name"}</h2>
+                            <h2 className="text-xl font-bold text-gray-500">{user?.name || "User Name"}</h2>
                             <p className="text-gray-400 mb-2">{user?.email || "Email"}</p>
-                            <p className="text-gray-400 mb-4">{user?.member || "Member"}</p>
+                            <p className="text-gray-400 mb-4">{user?.role || "Member"}</p>
                             
                             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                                 <button 

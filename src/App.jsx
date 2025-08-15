@@ -13,6 +13,7 @@ import { store } from "./reduxTool/store"
 import UpdateProject from "./pages/updateProject"
 import UpdateTask from "./pages/updateTask"
 import AddTask from "./pages/addTask"
+import { Provider } from "react-redux"
 
 
 function App() {
@@ -21,23 +22,24 @@ function App() {
   return (
     <>
    <BrowserRouter>
-   <provider store={store}>
+  <Provider store={store}>
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Login/>} />
+      <Route path="/Home" element={<Home/>} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
        <Route path="/forgotPassword" element={<ForgotPassword/>} />
-        <Route path="/resetPassword" element={< ResetPassword/>} />
+        <Route path="/resetPassword/:token" element={< ResetPassword/>} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/editprofile" element={<EditProfile />} />
       <Route path="/addteam" element={<AddTeam />} />
-      <Route path="/addproject" element={<AddProject />} />
+      <Route path="/addproject" element={<AddProject/>} />
       <Route path="/updateproject" element={<UpdateProject/>} />
       <Route path="/updatetask" element={<UpdateTask/>} />
       <Route path="/addtask" element={<AddTask/>} />
 
       </Routes>
-    </provider>
+   </Provider>
     
     </BrowserRouter>
   
