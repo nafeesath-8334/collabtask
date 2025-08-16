@@ -29,12 +29,19 @@ export const fetchUserDetails = async () => {
 export const createTeam= async (data,headers) => {
     return await commonApi("POST",  `${baseUrl}addTeam/`,data,headers);
 }
-export const fetchTeam = async () => {
-  return await commonApi("GET", `${baseUrl}fetchTeam`, "");
+export const fetchTeam = async (headers) => {
+  return await commonApi("GET", `${baseUrl}fetchTeam`,"", headers);
 };
 export const addProject= async (data,headers) => {
     return await commonApi("POST",  `${baseUrl}addProject/`,data,headers);
 }
-export const fetchProject = async () => {
-  return await commonApi("GET", `${baseUrl}fetchProject`, "");
+export const fetchProject = async (headers) => {
+  return await commonApi("GET", `${baseUrl}fetchProject`, "", headers);
 };
+
+export const getProjectById = async (id) => {
+  return await commonApi("GET", `${baseUrl}getProjectById/${id}`, "");
+};
+export const addTask =  async (data,headers) => {
+    return await commonApi("POST",  `${baseUrl}addTask/`,data,headers);
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { fetchProject, fetchProjects } from "../apiService/allApi";
+import { addTask, fetchProject, getProjectById } from "../apiService/allApi";
 
 const AddTask = () => {
   const [taskDetails, setTaskDetails] = useState({
@@ -16,52 +16,45 @@ const AddTask = () => {
 
   const token = JSON.parse(localStorage.getItem("token"));
   const headers = { Authorization: `Bearer ${token}` };
-
-  // Fetch all projects
-  useEffect(() => {
-    const getProjects = async () => {
+ useEffect(() => {
+    const loadProjects = async () => {
       try {
-        const res = await fetchProject(headers);
-        setProjects(res.data);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
+        const { data } = await fetchProject(headers);
+        setProjects(data);
+      } catch (err) {
+        console.error("Error fetching projects:", err);
       }
     };
-    getProjects();
+    loadProjects();
   }, []);
 
   // Fetch members when project changes
   useEffect(() => {
-    if (!taskDetails.projectId) {
-      setMembers([]);
-      return;
-    }
-
-    const fetchProjectMembers = async () => {
-      try {
-        const res = await axios.get(
-          `/api/projects/${taskDetails.projectId}/members`,
-          { headers }
-        );
-        setMembers(res.data.members || []);
-      } catch (error) {
-        console.error("Error fetching members:", error);
+    const loadMembers = async () => {
+      if (taskDetails.projectId) {
+        console.log("Fetching members for project:", taskDetails.projectId);
+        try {
+          const { data } = await getProjectById(taskDetails.projectId, headers);
+          setMembers(data.members || []);
+        } catch (err) {
+          console.error("Error fetching members:", err);
+        }
+      } else {
+        setMembers([]);
       }
     };
-
-    fetchProjectMembers();
+    loadMembers();
   }, [taskDetails.projectId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!taskDetails.title || !taskDetails.projectId) {
       alert("Title and Project are required");
       return;
     }
 
     try {
-      await axios.post("/api/tasks", taskDetails, { headers });
+      await addTask(taskDetails,headers);
       alert("Task created successfully!");
       setTaskDetails({
         title: "",
@@ -70,10 +63,9 @@ const AddTask = () => {
         assignedTo: "",
         dueDate: "",
       });
-      setMembers([]);
-    } catch (error) {
-      console.error("Error creating task:", error);
-      alert("Error creating task");
+    } catch (err) {
+      console.error("Error creating task:", err);
+      alert("Failed to create task");
     }
   };
 
@@ -118,8 +110,8 @@ const AddTask = () => {
           </div>
 
           {/* Project */}
-          <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium text-gray-700">
+           <div className="mb-4">
+            {/* <label className="block mb-2 text-sm font-medium text-gray-700">
               Project
             </label>
             <select
@@ -135,8 +127,27 @@ const AddTask = () => {
                   {proj.title}
                 </option>
               ))}
+            </select> */}
+           
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Project
+            </label>
+            <select
+              value={taskDetails.projectId}
+              onChange={(e) =>
+                setTaskDetails({ ...taskDetails, projectId: e.target.value })
+              }
+              className="w-full border rounded-lg p-2"
+            >
+              <option value="">Select project</option>
+              {/* Check if projects is an array and not empty before mapping */}
+              {Array.isArray(projects) && projects.length > 0 && projects.map((proj) => (
+                <option key={proj._id} value={proj._id}>
+                  {proj.title}
+                </option>
+              ))}
             </select>
-          </div>
+          </div> 
 
           {/* Assign To (members only) */}
           <div className="mb-4">
