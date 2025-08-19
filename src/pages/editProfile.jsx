@@ -1,17 +1,19 @@
 import {  useEffect, useState } from "react"
+import { editProfile } from "../apiService/allApi"
+import { useLocation, useNavigate } from "react-router-dom"
 
 
 const EditProfile = () => {
-   
-    const user = location.state?.user
+   const location = useLocation();
+  const { user, userId } = location.state || {}
+
     const [isLoading, setIsLoading] = useState(false)
     const [img, setImg] = useState(null)
     const [previewImg, setPreviewImg] = useState(user?.Image ? `http://localhost:3000${user.Image}` : null)
     
     const [userData, setUserData] = useState({
-        userId: "",
-        FirstName: "",
-        LastName: "",
+       
+       name:"",
         email: "",
         password: "",
       
@@ -20,16 +22,14 @@ const EditProfile = () => {
     useEffect(() => {
         if (user) {
             setUserData({
-                userId: user.userId,
-                FirstName: user.FirstName || "",
-                LastName: user.LastName || "",
+                name: user.name || "",
                 email: user.email || "",
                 password: user.password || "",
                
             })
         }
     }, [user])
-
+console.log("userData", userData)   
     const handleImage = (e) => {
         const selectedImg = e.target.files[0]
         if (selectedImg) {
@@ -41,8 +41,38 @@ const EditProfile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsLoading(true)
+         try {
+        const formData = new FormData();
+        if (img) formData.append("img", img); // must be "img"
+        formData.append("FirstName", userData.name);
+       
 
+        const token = JSON.parse(localStorage.getItem("token"));
+        const headers = {
+            "Content-Type": "multipart/form-data",
+            "authorization": `Bearer ${token}`
+        };
+
+        const response = await editProfile(userId, formData, headers);
+        if (response.status === 200) {
+            const successMessage = document.getElementById("success-message");
+            successMessage.classList.remove("hidden");
+
+            setTimeout(() => {
+                navigate("/profile");
+            }, 1500);
+        } else {
+            alert("Failed to update profile. Please try again.");
+        }
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        alert("An error occurred. Please try again.");
+    } finally {
+        setIsLoading(false);
     }
+};
+
+    const navigate = useNavigate();
 
     return (
         <>
@@ -127,25 +157,14 @@ const EditProfile = () => {
                                     </label>
                                     <input 
                                         type="text" 
-                                        value={userData.FirstName} 
-                                        onChange={(e) => setUserData({ ...userData, FirstName: e.target.value })} 
+                                        value={userData.name} 
+                                        onChange={(e) => setUserData({ ...userData, name: e.target.value })} 
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                                         required 
                                     />
                                 </div>
                                 
-                                <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Last Name
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        value={userData.LastName} 
-                                        onChange={(e) => setUserData({ ...userData, LastName: e.target.value })} 
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                        required 
-                                    />
-                                </div>
+                               
                                 
                                 <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -160,18 +179,7 @@ const EditProfile = () => {
                                     <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                                 </div>
                                 
-                                <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Password
-                                    </label>
-                                    <input 
-                                        type="password" 
-                                        value={userData.password} 
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed" 
-                                        disabled 
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">To change password, use reset option</p>
-                                </div>
+                                
                             </div>
                         </div>
                         

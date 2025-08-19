@@ -14,6 +14,7 @@ import UpdateProject from "./pages/updateProject"
 import UpdateTask from "./pages/updateTask"
 import AddTask from "./pages/addTask"
 import { Provider } from "react-redux"
+import ViewAllProjects from "./pages/viewAllProjects"
 
 
 function App() {
@@ -37,7 +38,7 @@ function App() {
       <Route path="/updateproject" element={<UpdateProject/>} />
       <Route path="/updatetask" element={<UpdateTask/>} />
       <Route path="/addtask" element={<AddTask/>} />
-
+<Route path="/viewAllProjects" element={<ViewAllProjects/>} />
       </Routes>
    </Provider>
     

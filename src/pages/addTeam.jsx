@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createTeam, fetchUserDetails } from "../apiService/allApi";
 
-const AddTeam = () => {
+const AddTeam = ({ projectId }) => {
   const [teamDetails, setTeamDetails] = useState({
     teamName: "",
     teamDescription: "",
@@ -9,19 +9,17 @@ const AddTeam = () => {
   });
 
   const [users, setUsers] = useState([]);
-const token = JSON.parse(localStorage.getItem("token"));
-      const headers = {
-        // "content-type": "application/json",
-        authorization: `Bearer ${token}`,
-         }
+  const token = JSON.parse(localStorage.getItem("token"));
+  const headers = {
+    authorization: `Bearer ${token}`,
+  };
+
   // Fetch registered members
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetchUserDetails();
-        console.log(res);
-       
-        setUsers(res.data);
+        const res = await fetchUserDetails(headers);
+        setUsers(res.data || []);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -29,35 +27,33 @@ const token = JSON.parse(localStorage.getItem("token"));
     fetchUsers();
   }, []);
 
+  // Handle form submit
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
+    if (
+      !teamDetails.teamName ||
+      !teamDetails.teamDescription ||
+      teamDetails.teamMembers.length === 0
+    ) {
+      alert("Please fill in all fields");
+      return;
+    }
 
-const handleSubmit = async (event) => {
-  event.preventDefault();
+    try {
+      const res = await createTeam(
+        { ...teamDetails, projectId }, // include projectId here
+        headers
+      );
+      alert(res.data.message);
+      console.log("Created team:", res.data.team);
+    } catch (error) {
+      console.error(error);
+      alert("Error creating team");
+    }
+  };
 
-  if (
-    !teamDetails.teamName ||
-    !teamDetails.teamDescription ||
-    teamDetails.teamMembers.length === 0
-  ) {
-    alert("Please fill in all fields");
-    return;
-  }
-
-  try {
-    
-    const res = await createTeam(teamDetails,headers);
-    console.log(res);
-      
-alert("Team created successfully");
-    // alert(res.data.message);
-    // console.log(res.data.team);
-  } catch (error) {
-    console.error(error);
-    alert("Error creating team");
-  }
-};
-
-
+  // Handle members select
   const handleMemberChange = (e) => {
     const selectedOptions = Array.from(e.target.selectedOptions).map(
       (option) => option.value
@@ -72,7 +68,7 @@ alert("Team created successfully");
         <div className="py-6 text-center">
           <h2 className="text-3xl font-bold">Add Team</h2>
           <p className="text-gray-500 text-sm mt-1">
-            Create a new team to collaborate on tasks
+            Create a new team for this project
           </p>
         </div>
 
@@ -115,6 +111,9 @@ alert("Team created successfully");
 
             {/* Team Members */}
             <div className="mb-6">
+              <label className="block text-gray-700 font-medium text-sm mb-2">
+                Select Team Members
+              </label>
               <select
                 multiple
                 className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -123,11 +122,10 @@ alert("Team created successfully");
               >
                 {users.map((user) => (
                   <option key={user._id} value={user._id}>
-                    {user.name}
+                    {user.name} ({user.email})
                   </option>
                 ))}
               </select>
-
             </div>
 
             {/* Submit button */}

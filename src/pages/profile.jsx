@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react"
 import Navbar from "../component/Navbar"
 import { getProfile } from "../apiService/allApi"
+import { useNavigate } from "react-router-dom"
 
 
 
 
 const Profile = () => {
    
-    const [user, setUser] = useState({})
+    const [user, setUser] = useState([])
     const [img, setImg] = useState("")
     const [isLoading, setIsLoading] = useState(true)
+    const navigate = useNavigate();
      const token = JSON.parse(localStorage.getItem("token"));
       const headers = {
         // "content-type": "application/json",
@@ -36,7 +38,7 @@ useEffect(() => {
   }
 }, []);
 
-
+console.log("user", user);
     return (
     <>
    
@@ -58,7 +60,7 @@ useEffect(() => {
                                 {img ? (
                                     <img
                                         src={`http://localhost:3000${img}`}
-                                        alt={user?.FirstName || "User"}
+                                        alt={user?.name || "User"}
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
@@ -73,6 +75,7 @@ useEffect(() => {
                         
                         {/* User Details */}
                         <div className="flex-1 text-center md:text-left">
+                      
                             <h2 className="text-xl font-bold text-gray-500">{user?.name || "User Name"}</h2>
                             <p className="text-gray-400 mb-2">{user?.email || "Email"}</p>
                             <p className="text-gray-400 mb-4">{user?.role || "Member"}</p>
@@ -80,7 +83,9 @@ useEffect(() => {
                             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                                 <button 
                                     className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition shadow-sm"
-                                    onClick={() => alert("Edit Profile Clicked")}
+                                    onClick={() => navigate("/editProfile", { state: { user, userId: user._id} })}
+
+
                                 >
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

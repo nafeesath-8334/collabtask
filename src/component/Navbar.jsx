@@ -31,6 +31,7 @@ const Navbar = () => {
             <Link to="/AddTask" className="hover:text-indigo-400">Tasks</Link>
             <Link to="/AddTeam" className="hover:text-indigo-400">Teams</Link>
             <Link to="/profile" className="hover:text-indigo-400">Profile</Link>
+             <Link to="/viewAllProjects" className="hover:text-indigo-400">View</Link>
             <Link to="/login" className="hover:text-indigo-400">Logout</Link>
           </div>
 

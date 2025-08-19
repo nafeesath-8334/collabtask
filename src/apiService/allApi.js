@@ -25,7 +25,13 @@ export const resetPassword = async (token, data) => {
 }
 export const fetchUserDetails = async () => {
   return await commonApi("GET", `${baseUrl}fetchUserDetails`, "");
+
 };
+export const editProfile = async (userId, userData, headers) => {
+    console.log(userData)
+    console.log(userId)
+    return await commonApi("PUT", `${baseUrl}editProfile/${userId}`, userData, headers);
+}
 export const createTeam= async (data,headers) => {
     return await commonApi("POST",  `${baseUrl}addTeam/`,data,headers);
 }
@@ -39,8 +45,8 @@ export const fetchProject = async (headers) => {
   return await commonApi("GET", `${baseUrl}fetchProject`, "", headers);
 };
 
-export const getProjectById = async (id) => {
-  return await commonApi("GET", `${baseUrl}getProjectById/${id}`, "");
+export const getProjectById = async (id,headers) => {
+  return await commonApi("GET", `${baseUrl}getProjectById/${id}`, "",headers);
 };
 export const addTask =  async (data,headers) => {
     return await commonApi("POST",  `${baseUrl}addTask/`,data,headers);
