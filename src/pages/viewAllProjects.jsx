@@ -58,15 +58,33 @@ const ViewAllProjects = () => {
               <p className="text-gray-600">{project.description}</p>
               <p className="text-gray-600">Owner: {project.owner?.name}</p>
 
-              {/* ✅ Show Team */}
+              {/* ✅ Show Team (Members) */}
+
               {project.team ? (
                 <div className="mt-2">
                   <h3 className="text-md font-semibold">Team:</h3>
-                  <p className="text-gray-700">{project.team.name}</p>
+                  <p className="text-gray-700">
+                    {project.team.name} – {project.team.description}
+                  </p>
+
+                 {project.team.members && project.team.members.length > 0 ? (
+  <ul className="list-disc pl-5">
+    {project.team.members.map((m) => (
+      <li key={m._id} className="text-gray-700">
+        {m.user?.name}   <span className="text-sm text-gray-500">{m.role}</span>
+      </li>
+    ))}
+  </ul>
+) : (
+  <p className="text-gray-500">No team members yet.</p>
+)}
+
                 </div>
               ) : (
                 <p className="text-gray-500">No team added yet.</p>
               )}
+
+
 
               {/* ✅ Show Tasks */}
               {project.tasks && project.tasks.length > 0 ? (
@@ -77,6 +95,7 @@ const ViewAllProjects = () => {
                       <li key={task._id} className="text-gray-700">
                         <span className="font-medium">{task.title}</span> –
                         <span className="text-sm text-gray-500">{task.status}</span>
+                        (Assigned to: {task.assignedTo?.name || "Unassigned"})
                       </li>
                     ))}
                   </ul>
@@ -84,6 +103,7 @@ const ViewAllProjects = () => {
               ) : (
                 <p className="text-gray-500">No tasks added yet.</p>
               )}
+
 
 
               <p className="text-gray-600">

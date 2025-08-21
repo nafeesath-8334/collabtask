@@ -17,18 +17,26 @@ const AddTask = ({ projectId, onClose }) => {
 
   // ✅ Fetch project members when modal opens
   useEffect(() => {
-    const loadMembers = async () => {
-      try {
-        if (projectId) {
-          const project = await getProjectById(projectId, headers);
-          setMembers(project.data?.members || []);
-        }
-      } catch (err) {
-        console.error("Error fetching members:", err);
+  const loadMembers = async () => {
+    try {
+      if (projectId) {
+        const project = await getProjectById(projectId, headers);
+        const proj = project.data;
+
+        // ✅ Combine both direct members + team members here
+        const combinedMembers = [
+          ...(proj.members || []),
+          ...(proj.team?.members?.map((m) => m.user) || []),
+        ];
+
+        setMembers(combinedMembers);
       }
-    };
-    loadMembers();
-  }, [projectId]);
+    } catch (err) {
+      console.error("Error fetching members:", err);
+    }
+  };
+  loadMembers();
+}, [projectId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
