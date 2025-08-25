@@ -34,7 +34,8 @@ const Login = () => {
 
                 localStorage.setItem("userCredentials", JSON.stringify(userCredentials))
                 localStorage.setItem("token", JSON.stringify(result.data.token))
-
+                localStorage.setItem("role", result.data.role,);
+        
                 dispatch(updateIsLoggedIn(true))
                 navigate("/Home");
             } else {

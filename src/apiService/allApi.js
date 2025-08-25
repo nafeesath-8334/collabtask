@@ -51,3 +51,15 @@ export const getProjectById = async (id,headers) => {
 export const addTask =  async (data,headers) => {
     return await commonApi("POST",  `${baseUrl}addTask/`,data,headers);
 }
+export const getTaskById = async (id,headers) => {
+  return await commonApi("GET", `${baseUrl}getTaskById/${id}`, "",headers);
+};
+export const updateProject =  async (id,data,headers) => {
+    return await commonApi("PUT",  `${baseUrl}updateProject/${id}`,data,headers);
+}
+export const updateTask =  async (id,data,headers) => {
+    return await commonApi("PUT",  `${baseUrl}updateTask/${id}`,data,headers);
+}
+export const fetchProjectByUserId = async (id,headers) => {
+  return await commonApi("GET", `${baseUrl}fetchProjectByUserId/${id}`,"", headers);
+};

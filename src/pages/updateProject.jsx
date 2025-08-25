@@ -1,226 +1,98 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import { updateProject, getProjectById } from "../apiService/allApi";
 
-const UpdateProject = () => {
-  const [updatetDetails, setUpdateDetails] = useState({
+const UpdateProject = ({ projectId, onClose }) => {
+  const [project, setProject] = useState({
     title: "",
-    description: "", 
-    member: "",
+    description: "",
+    status: "active",
     deadline: "",
-    owner: "",
-    team: "",
-    task: "",
-    status: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handle = (event) => {
-    event.preventDefault();
+  const token = JSON.parse(localStorage.getItem("token"));
+  const headers = { Authorization: `Bearer ${token}` };
 
-    if (
-      !updatetDetails.title||
-      !updatetDetails.description ||
-      !updatetDetails.member ||
-      !updatetDetails.deadline ||
-      !updatetDetails.owner ||
-      !updatetDetails.team ||
-      !updatetDetails.task ||
-      !updatetDetails.status
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const res = await getProjectById(projectId, headers);
+        const data = res.data;
+        console.log(data);
+        setProject({
+          title: data.title,
+          description: data.description,
+          status: data.status,
+          deadline: data.deadline ? data.deadline.split("T")[0] : "",
+        });
+      } catch (err) {
+        console.error("Error fetching project:", err);
+      }
+    };
+    fetchProject();
+  }, [projectId]);
 
-      
-      
-    ) {
-      alert("Please fill in all fields");
-      return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      await updateProject(projectId, project, headers);
+      alert("✅ Project updated successfully!");
+      onClose();
+    } catch (err) {
+      console.error("Error updating project:", err);
+      alert("❌ Failed to update project");
+    } finally {
+      setLoading(false);
     }
-
-    alert(
-      `Project Title:${updatetDetails.title}\n` +
-      `Description:${updatetDetails.description}\n` + 
-       `Member:${updatetDetails.member}\n` +
-      `Deadline:${updatetDetails.deadline}\n` +
-      `Owner:${updatetDetails.owner}\n` +
-      `Team:${updatetDetails.team}\n` +
-      `Task:${updatetDetails.task}\n` +
-      `Status:${updatetDetails.status}`
-
-
-    );
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Header */}
-        <div className="py-6 text-center">
-          <h2 className="text-3xl font-bold">Update Project</h2>
-          <p className="text-gray-500 text-sm mt-1">
-            Fill in the details below to update the project.
-          </p>
-        </div>
+    <div className="p-6">
+      <h2 className="text-xl font-bold mb-4">Update Project</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Title"
+          value={project.title}
+          onChange={(e) => setProject({ ...project, title: e.target.value })}
+          className="w-full border p-2 mb-3 rounded"
+          required
+        />
 
-        {/* Form */}
-        <form onSubmit={handle}>
-          <div className="p-8">
-            {/* Team Name */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-               Title
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Title"
-                value={updatetDetails.title}
-                onChange={(e) =>
-                  setUpdateDetails({
-                    ...updatetDetails,
-                    title: e.target.value,
-                  })
-                }
-              />
-            </div>
+        <textarea
+          placeholder="Description"
+          value={project.description}
+          onChange={(e) => setProject({ ...project, description: e.target.value })}
+          className="w-full border p-2 mb-3 rounded"
+          rows={3}
+        />
 
-            {/* Team Description */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                 Description
-              </label>
-              <textarea
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Describe your projrct"
-                value={updatetDetails.description}
-                onChange={(e) =>
-                  setUpdateDetails({
-                    ...updatetDetails,
-                    description: e.target.value,
-                  })  
-                }
-              ></textarea>
-            </div>
+        <select
+          value={project.status}
+          onChange={(e) => setProject({ ...project, status: e.target.value })}
+          className="w-full border p-2 mb-3 rounded"
+        >
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+          <option value="archived">Archived</option>
+        </select>
 
-            {/* Member */}
-            <div className="mb-6">  
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Member
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Member Name"
-                value={updatetDetails.member}
-                onChange={(e) =>
-                  setUpdateDetails({
-                    ...updatetDetails,
-                    member: e.target.value,
-                  })
-                }
-              />
-            </div>
-            {/* Deadline */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Deadline
-              </label>
-              <input
-                type="date"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={updatetDetails.deadline}
-                onChange={(e) =>
-                  setUpdateDetails({
-                    ...updatetDetails,
-                    deadline: e.target.value,
-                  })
-                }
-              />
-            </div>
-            {/* Owner */}
-            <div className="mb-6">
-                
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Owner
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Owner Name"
-                value={updatetDetails.owner}
-                onChange={(e) =>
-                  setUpdateDetails({
-                    ...updatetDetails,
-                    owner: e.target.value,
-                  })
-                }
+        <input
+          type="date"
+          value={project.deadline}
+          onChange={(e) => setProject({ ...project, deadline: e.target.value })}
+          className="w-full border p-2 mb-3 rounded"
+        />
 
-              />
-            </div>
-            {/* Team */}
-            <div className="mb-6">
-                
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Team
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Team Name"
-                value={updatetDetails.team}
-                onChange={(e) =>
-                  setUpdateDetails({
-                    ...updatetDetails,
-                    team: e.target.value,
-                  })
-                }
-              />
-            </div>
-            {/* Task */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Task
-              </label>
-              <input
-                type="text"
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter Task Name"
-                value={updatetDetails.task}
-                onChange={(e) =>
-                  setUpdateDetails({
-                    ...updatetDetails,
-                    task: e.target.value,
-                  })
-                }
-              />
-            </div>
-            {/* Status */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium text-sm mb-2">
-                Status
-              </label>
-              <select
-                className="w-full pl-3 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={updatetDetails.status}
-                onChange={(e) =>
-                  setUpdateDetails({
-                    ...updatetDetails,
-                    status: e.target.value,
-                  })
-                }
-              >
-                <option value="">Select Status</option>
-                <option value="Not Started">Not Started</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-
-            {/* Submit button */}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-gray-500 to-gray-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 hover:from-gray-700 hover:to-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 shadow-md hover:shadow-lg"
-            >
-             Update Project
-            </button>
-          </div>
-        </form>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          {loading ? "Updating..." : "Update Project"}
+        </button>
+      </form>
     </div>
   );
 };

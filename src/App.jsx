@@ -15,6 +15,8 @@ import UpdateTask from "./pages/updateTask"
 import AddTask from "./pages/addTask"
 import { Provider } from "react-redux"
 import ViewAllProjects from "./pages/viewAllProjects"
+import MyWork from "./pages/myWork"
+import UpdateTeam from "./pages/updateTeam"
 
 
 function App() {
@@ -34,11 +36,13 @@ function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/editprofile" element={<EditProfile />} />
       <Route path="/addteam" element={<AddTeam />} />
+       <Route path="/updateteam" element={<UpdateTeam/>} />
       <Route path="/addproject" element={<AddProject/>} />
       <Route path="/updateproject" element={<UpdateProject/>} />
       <Route path="/updatetask" element={<UpdateTask/>} />
       <Route path="/addtask" element={<AddTask/>} />
 <Route path="/viewAllProjects" element={<ViewAllProjects/>} />
+<Route path="/myWork" element={<MyWork/>} />
       </Routes>
    </Provider>
     
